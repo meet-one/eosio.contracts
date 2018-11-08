@@ -144,82 +144,83 @@ namespace eosiosystem {
       _gstate2.revision = revision;
    }
 
-   void system_contract::bidname( name bidder, name newname, asset bid ) {
-      require_auth( bidder );
-      // eosio_assert( newname.suffix() == newname, "you can only bid on top-level suffix" );
+//    void system_contract::bidname( name bidder, name newname, asset bid ) {
+//       return ;
+//       require_auth( bidder );
+//       // eosio_assert( newname.suffix() == newname, "you can only bid on top-level suffix" );
 
-      eosio_assert( (bool)newname, "the empty name is not a valid account name to bid on" );
-      eosio_assert( (newname.value & 0xFull) == 0, "13 character names are not valid account names to bid on" );
-      eosio_assert( (newname.value & 0x1F0ull) == 0, "accounts with 12 character names and no dots can be created without bidding required" );
-      eosio_assert( !is_account( newname ), "account already exists" );
+//       eosio_assert( (bool)newname, "the empty name is not a valid account name to bid on" );
+//       eosio_assert( (newname.value & 0xFull) == 0, "13 character names are not valid account names to bid on" );
+//       eosio_assert( (newname.value & 0x1F0ull) == 0, "accounts with 12 character names and no dots can be created without bidding required" );
+//       eosio_assert( !is_account( newname ), "account already exists" );
       
-      auto suffix = newname.suffix();
-      eosio_assert( suffix.value == (0x12ull << 59) , "you can only bid on suffix is ‘.m’" );//竞拍名字中是否包含.m
-      bool has_dot = false; 
-      uint32_t dot_count = 0; 
-      for( int32_t moving_bits = 4; moving_bits <= 59; moving_bits += 5 ) { //判断点的数量是否小于2
-         if( (newname.value & (0x1full << moving_bits)) ){  
-            has_dot = true;
-         }
-         if( !(newname.value & (0x1full << moving_bits)) && has_dot ){
-            dot_count +=1;
-            eosio_assert( dot_count < 2, "only dots less than 2 can bid on" );
-         }
-      }
-      eosio_assert( bid.symbol == core_symbol(), "asset must be system token" );
-      eosio_assert( bid.amount > 0, "insufficient bid" );
+//       auto suffix = newname.suffix();
+//       eosio_assert( suffix.value == (0x12ull << 59) , "you can only bid on suffix is ‘.m’" );//竞拍名字中是否包含.m
+//       bool has_dot = false; 
+//       uint32_t dot_count = 0; 
+//       for( int32_t moving_bits = 4; moving_bits <= 59; moving_bits += 5 ) { //判断点的数量是否小于2
+//          if( (newname.value & (0x1full << moving_bits)) ){  
+//             has_dot = true;
+//          }
+//          if( !(newname.value & (0x1full << moving_bits)) && has_dot ){
+//             dot_count +=1;
+//             eosio_assert( dot_count < 2, "only dots less than 2 can bid on" );
+//          }
+//       }
+//       eosio_assert( bid.symbol == core_symbol(), "asset must be system token" );
+//       eosio_assert( bid.amount > 0, "insufficient bid" );
 
-      INLINE_ACTION_SENDER(eosio::token, transfer)(
-         token_account, { {bidder, active_permission} },
-         { bidder, names_account, bid, std::string("bid name ")+ newname.to_string() }
-      );
+//       INLINE_ACTION_SENDER(eosio::token, transfer)(
+//          token_account, { {bidder, active_permission} },
+//          { bidder, names_account, bid, std::string("bid name ")+ newname.to_string() }
+//       );
 
-      name_bid_table bids(_self, _self.value);
-      print( name{bidder}, " bid ", bid, " on ", name{newname}, "\n" );
-      auto current = bids.find( newname.value );
-      if( current == bids.end() ) {
-         bids.emplace( bidder, [&]( auto& b ) {
-            b.newname = newname;
-            b.high_bidder = bidder;
-            b.high_bid = bid.amount;
-            b.last_bid_time = current_time_point();
-         });
-      } else {
-         eosio_assert( current->high_bid > 0, "this auction has already closed" );
-         eosio_assert( bid.amount - current->high_bid > (current->high_bid / 10), "must increase bid by 10%" );
-         eosio_assert( current->high_bidder != bidder, "account is already highest bidder" );
+//       name_bid_table bids(_self, _self.value);
+//       print( name{bidder}, " bid ", bid, " on ", name{newname}, "\n" );
+//       auto current = bids.find( newname.value );
+//       if( current == bids.end() ) {
+//          bids.emplace( bidder, [&]( auto& b ) {
+//             b.newname = newname;
+//             b.high_bidder = bidder;
+//             b.high_bid = bid.amount;
+//             b.last_bid_time = current_time_point();
+//          });
+//       } else {
+//          eosio_assert( current->high_bid > 0, "this auction has already closed" );
+//          eosio_assert( bid.amount - current->high_bid > (current->high_bid / 10), "must increase bid by 10%" );
+//          eosio_assert( current->high_bidder != bidder, "account is already highest bidder" );
 
-         bid_refund_table refunds_table(_self, newname.value);
+//          bid_refund_table refunds_table(_self, newname.value);
 
-         auto it = refunds_table.find( current->high_bidder.value );
-         if ( it != refunds_table.end() ) {
-            refunds_table.modify( it, same_payer, [&](auto& r) {
-                  r.amount += asset( current->high_bid, core_symbol() );
-               });
-         } else {
-            refunds_table.emplace( bidder, [&](auto& r) {
-                  r.bidder = current->high_bidder;
-                  r.amount = asset( current->high_bid, core_symbol() );
-               });
-         }
+//          auto it = refunds_table.find( current->high_bidder.value );
+//          if ( it != refunds_table.end() ) {
+//             refunds_table.modify( it, same_payer, [&](auto& r) {
+//                   r.amount += asset( current->high_bid, core_symbol() );
+//                });
+//          } else {
+//             refunds_table.emplace( bidder, [&](auto& r) {
+//                   r.bidder = current->high_bidder;
+//                   r.amount = asset( current->high_bid, core_symbol() );
+//                });
+//          }
 
-         transaction t;
-         t.actions.emplace_back( permission_level{_self, active_permission},
-                                 _self, "bidrefund"_n,
-                                 std::make_tuple( current->high_bidder, newname )
-         );
-         t.delay_sec = 0;
-         uint128_t deferred_id = (uint128_t(newname.value) << 64) | current->high_bidder.value;
-         cancel_deferred( deferred_id );
-         t.send( deferred_id, bidder );
+//          transaction t;
+//          t.actions.emplace_back( permission_level{_self, active_permission},
+//                                  _self, "bidrefund"_n,
+//                                  std::make_tuple( current->high_bidder, newname )
+//          );
+//          t.delay_sec = 0;
+//          uint128_t deferred_id = (uint128_t(newname.value) << 64) | current->high_bidder.value;
+//          cancel_deferred( deferred_id );
+//          t.send( deferred_id, bidder );
 
-         bids.modify( current, bidder, [&]( auto& b ) {
-            b.high_bidder = bidder;
-            b.high_bid = bid.amount;
-            b.last_bid_time = current_time_point();
-         });
-      }
-   }
+//          bids.modify( current, bidder, [&]( auto& b ) {
+//             b.high_bidder = bidder;
+//             b.high_bid = bid.amount;
+//             b.last_bid_time = current_time_point();
+//          });
+//       }
+//    }
 
    void system_contract::bidrefund( name bidder, name newname ) {
       bid_refund_table refunds_table(_self, newname.value);
@@ -245,38 +246,51 @@ namespace eosiosystem {
                             name              newact,
                             ignore<authority> owner,
                             ignore<authority> active ) {
-
+      require_auth(creator);
       if( creator != _self ) {
-         uint64_t tmp = newact.value >> 4;
-         bool has_dot = false;
-         uint32_t dot_count = 0;
+      //    uint64_t tmp = newact.value >> 4;
+      //    bool has_dot = false;
+      //    uint32_t dot_count = 0;
 
-         for( uint32_t i = 0; i < 12; ++i ) {
-           has_dot |= !(tmp & 0x1f);
-           if( !(tmp & 0x1f) ){ // the number of dat
-                dot_count += 1;
+      //    for( uint32_t i = 0; i < 12; ++i ) {
+      //      has_dot |= !(tmp & 0x1f);
+      //      if( !(tmp & 0x1f) ){ // the number of dat
+      //           dot_count += 1;
+      //       }
+      //      tmp >>= 5;
+      //    }
+         auto suffix = newact.suffix();
+         eosio_assert( suffix.value == (0x12ull << 59) , "you can only create name suffix is ‘.m’" );//竞拍名字中是否包含.m
+         bool has_dot = false; 
+         uint32_t dot_count = 0; 
+         for( int32_t moving_bits = 4; moving_bits <= 59; moving_bits += 5 ) { //判断点的数量是否小于2
+            if( (newact.value & (0x1full << moving_bits)) ){  
+               has_dot = true;
             }
-           tmp >>= 5;
+            if( !(newact.value & (0x1full << moving_bits)) && has_dot ){
+               dot_count +=1;
+               eosio_assert( dot_count < 2, "only dots less than 2 can create" );
+            }
          }
-         if( has_dot ) { // or is less than 12 characters
-            auto suffix = newact.suffix();
+      //    if( has_dot ) { // or is less than 12 characters
+      //    auto suffix = newact.suffix();
             // if( suffix == newact ) {
-            if( (newact.value & 0x1F0ull) == 0 ) { //是否为短用户名
-               eosio_assert(!(suffix == newact) &&  suffix.value == (0x12ull << 59),"suffix must '.m' ");//短用户名中是否有".m"
-               name_bid_table bids(_self, _self.value);
-               auto current = bids.find( newact.value );
-               eosio_assert( current != bids.end(), "no active bid for name" );
-               eosio_assert( current->high_bidder == creator, "only highest bidder can claim" );
-               eosio_assert( current->high_bid < 0, "auction for name is not closed yet" );
-               bids.erase( current );
-            } else {
+            // if( (newact.value & 0x1F0ull) == 0 ) { //是否为短用户名
+            //    eosio_assert(!(suffix == newact) &&  suffix.value == (0x12ull << 59),"suffix must '.m' ");//短用户名中是否有".m"
+            //    name_bid_table bids(_self, _self.value);
+            //    auto current = bids.find( newact.value );
+            //    eosio_assert( current != bids.end(), "no active bid for name" );
+            //    eosio_assert( current->high_bidder == creator, "only highest bidder can claim" );
+            //    eosio_assert( current->high_bid < 0, "auction for name is not closed yet" );
+            //    bids.erase( current );
+            // } else {
             //    eosio_assert( creator == suffix, "only suffix may create this account" );
-               eosio_assert( suffix.value == (0x12ull << 59 ), "only suffix is '.m' may create this account" ); // 用户名.m的判断
-               eosio_assert( dot_count < 2, "only dots less than 2 may create this account" ); // 用户名中点的个数是否超过2
-            }
-         }else{
-            eosio_assert( has_dot, "only suffix is '.m' may create this account" ); // 正常用户是否含“.m”
-         }
+      //    eosio_assert( suffix.value == (0x12ull << 59 ), "only suffix is '.m' can create this account" ); // 用户名.m的判断
+      //    eosio_assert( dot_count < 2, "only dots less than 2 may create this account" ); // 用户名中点的个数是否超过2
+            // }
+      //    }else{
+      //       eosio_assert( has_dot, "only suffix is '.m' may create this account" ); // 正常用户是否含“.m”
+      //    }
       }
 
       user_resources_table  userres( _self, newact.value);
@@ -333,7 +347,7 @@ EOSIO_DISPATCH( eosiosystem::system_contract,
      // native.hpp (newaccount definition is actually in eosio.system.cpp)
      (newaccount)(updateauth)(deleteauth)(linkauth)(unlinkauth)(canceldelay)(onerror)(setabi)
      // eosio.system.cpp
-     (init)(setram)(setramrate)(setparams)(setpriv)(setalimits)(rmvproducer)(updtrevision)(bidname)(bidrefund)
+     (init)(setram)(setramrate)(setparams)(setpriv)(setalimits)(rmvproducer)(updtrevision)(bidrefund)
      // delegate_bandwidth.cpp
      (buyrambytes)(buyram)(sellram)(delegatebw)(undelegatebw)(refund)
      // voting.cpp
