@@ -311,8 +311,8 @@ namespace eosiosystem {
          [[eosio::action]]
          void updtrevision( uint8_t revision );
 
-         [[eosio::action]]
-         void bidname( name bidder, name newname, asset bid );
+        //  [[eosio::action]]
+        //  void bidname( name bidder, name newname, asset bid );
 
          [[eosio::action]]
          void bidrefund( name bidder, name newname );
