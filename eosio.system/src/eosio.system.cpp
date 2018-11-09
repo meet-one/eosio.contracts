@@ -246,7 +246,7 @@ namespace eosiosystem {
                             name              newact,
                             ignore<authority> owner,
                             ignore<authority> active ) {
-      require_auth(creator);
+      // require_auth(creator);
       if( creator != _self ) {
       //    uint64_t tmp = newact.value >> 4;
       //    bool has_dot = false;
@@ -261,6 +261,8 @@ namespace eosiosystem {
       //    }
          auto suffix = newact.suffix();
          eosio_assert( suffix.value == (0x12ull << 59) , "you can only create name suffix is ‘.m’" );//竞拍名字中是否包含.m
+         eosio_assert( creator == suffix,"only account m may create this account");
+         require_auth(creator);
          bool has_dot = false; 
          uint32_t dot_count = 0; 
          for( int32_t moving_bits = 4; moving_bits <= 59; moving_bits += 5 ) { //判断点的数量是否小于2
