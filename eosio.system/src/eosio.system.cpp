@@ -144,8 +144,8 @@ namespace eosiosystem {
       _gstate2.revision = revision;
    }
 
-//    void system_contract::bidname( name bidder, name newname, asset bid ) {
-//       return ;
+   void system_contract::bidname( name bidder, name newname, asset bid ) {
+      eosio_assert(false,"sidechain no need bidname!") ;
 //       require_auth( bidder );
 //       // eosio_assert( newname.suffix() == newname, "you can only bid on top-level suffix" );
 
@@ -220,7 +220,7 @@ namespace eosiosystem {
 //             b.last_bid_time = current_time_point();
 //          });
 //       }
-//    }
+   }
 
    void system_contract::bidrefund( name bidder, name newname ) {
       bid_refund_table refunds_table(_self, newname.value);
@@ -237,35 +237,24 @@ namespace eosiosystem {
     *  Called after a new account is created. This code enforces resource-limits rules
     *  for new accounts as well as new account naming conventions.
     *
-    *  Account names containing '.' symbols must have a suffix equal to the name of the creator.
-    *  This allows users who buy a premium name (shorter than 12 characters with no dots) to be the only ones
-    *  who can create accounts with the creator's name as a suffix.
+    *  Account names must have a suffix '.m'.
+    *  This only allows account m create account shorter than 12 characters.
     *
     */
    void native::newaccount( name              creator,
                             name              newact,
                             ignore<authority> owner,
                             ignore<authority> active ) {
-      // require_auth(creator);
       if( creator != _self ) {
-      //    uint64_t tmp = newact.value >> 4;
-      //    bool has_dot = false;
-      //    uint32_t dot_count = 0;
-
-      //    for( uint32_t i = 0; i < 12; ++i ) {
-      //      has_dot |= !(tmp & 0x1f);
-      //      if( !(tmp & 0x1f) ){ // the number of dat
-      //           dot_count += 1;
-      //       }
-      //      tmp >>= 5;
-      //    }
          auto suffix = newact.suffix();
-         eosio_assert( suffix.value == (0x12ull << 59) , "you can only create name suffix is ‘.m’" );//竞拍名字中是否包含.m
-         eosio_assert( creator == suffix,"only account m may create this account");
-         require_auth(creator);
+         eosio_assert( suffix.value == (0x12ull << 59) , "you can only create name suffix is ‘.m’" );
+         //小于12个字符长度的名字只有m账户可以创建
+         if( (newact.value & 0x1F0ull) == 0 ){
+             eosio_assert( creator == suffix, "only account m can create this account" );
+         }         
          bool has_dot = false; 
          uint32_t dot_count = 0; 
-         for( int32_t moving_bits = 4; moving_bits <= 59; moving_bits += 5 ) { //判断点的数量是否小于2
+         for( int32_t moving_bits = 4; moving_bits <= 59; moving_bits += 5 ) { 
             if( (newact.value & (0x1full << moving_bits)) ){  
                has_dot = true;
             }
@@ -273,26 +262,7 @@ namespace eosiosystem {
                dot_count +=1;
                eosio_assert( dot_count < 2, "only dots less than 2 can create" );
             }
-         }
-      //    if( has_dot ) { // or is less than 12 characters
-      //    auto suffix = newact.suffix();
-            // if( suffix == newact ) {
-            // if( (newact.value & 0x1F0ull) == 0 ) { //是否为短用户名
-            //    eosio_assert(!(suffix == newact) &&  suffix.value == (0x12ull << 59),"suffix must '.m' ");//短用户名中是否有".m"
-            //    name_bid_table bids(_self, _self.value);
-            //    auto current = bids.find( newact.value );
-            //    eosio_assert( current != bids.end(), "no active bid for name" );
-            //    eosio_assert( current->high_bidder == creator, "only highest bidder can claim" );
-            //    eosio_assert( current->high_bid < 0, "auction for name is not closed yet" );
-            //    bids.erase( current );
-            // } else {
-            //    eosio_assert( creator == suffix, "only suffix may create this account" );
-      //    eosio_assert( suffix.value == (0x12ull << 59 ), "only suffix is '.m' can create this account" ); // 用户名.m的判断
-      //    eosio_assert( dot_count < 2, "only dots less than 2 may create this account" ); // 用户名中点的个数是否超过2
-            // }
-      //    }else{
-      //       eosio_assert( has_dot, "only suffix is '.m' may create this account" ); // 正常用户是否含“.m”
-      //    }
+         } 
       }
 
       user_resources_table  userres( _self, newact.value);
@@ -348,7 +318,7 @@ EOSIO_DISPATCH( eosiosystem::system_contract,
      // native.hpp (newaccount definition is actually in eosio.system.cpp)
      (newaccount)(updateauth)(deleteauth)(linkauth)(unlinkauth)(canceldelay)(onerror)(setabi)
      // eosio.system.cpp
-     (init)(setram)(setramrate)(setparams)(setpriv)(setalimits)(rmvproducer)(updtrevision)(bidrefund)
+     (init)(setram)(setramrate)(setparams)(setpriv)(setalimits)(rmvproducer)(updtrevision)(bidname)(bidrefund)
      // delegate_bandwidth.cpp
      (buyrambytes)(buyram)(sellram)(delegatebw)(undelegatebw)(refund)
      // voting.cpp
