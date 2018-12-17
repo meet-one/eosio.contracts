@@ -145,7 +145,7 @@ namespace eosiosystem {
    }
 
    void system_contract::bidname( name bidder, name newname, asset bid ) {
-      eosio_assert(false,"sidechain no need bidname!") ;
+      eosio_assert(false,"Please go to the main chain to bid name.") ;
 //       require_auth( bidder );
 //       // eosio_assert( newname.suffix() == newname, "you can only bid on top-level suffix" );
 

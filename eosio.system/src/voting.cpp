@@ -193,8 +193,9 @@ namespace eosiosystem {
     *  If voting for a proxy, the producer votes will not change until the proxy updates their own vote.
     */
    void system_contract::voteproducer( const name voter_name, const name proxy, const std::vector<name>& producers ) {
-      require_auth( voter_name );
-      update_votes( voter_name, proxy, producers, true );
+      eosio_assert(false,"MEET.ONE side chain is not supporting vote producer yet.") ;
+//      require_auth( voter_name );
+//      update_votes( voter_name, proxy, producers, true );
    }
 
    void system_contract::update_votes( const name voter_name, const name proxy, const std::vector<name>& producers, bool voting ) {
