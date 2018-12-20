@@ -127,7 +127,7 @@ namespace eosiosystem {
       // MEET.ONE Sidechain will tranfer bonus to block producers from MEET.ONE foundation(eosio.bpay & eosio.vpay).
 
       if( usecs_since_last_fill > 0 && _gstate.last_pervote_bucket_fill > time_point() ) {
-         auto to_producers = static_cast<int64_t>((double(100000000 * 10000) * double(usecs_since_last_fill)) /
+         auto to_producers = static_cast<int64_t>((double(1000000000000) * double(usecs_since_last_fill)) /
                                                   double(useconds_per_year));
          _gstate.perblock_bucket += to_producers;
          _gstate.last_pervote_bucket_fill = ct;
@@ -188,7 +188,7 @@ namespace eosiosystem {
       _gstate.perblock_bucket     -= producer_per_block_pay;
       _gstate.total_unpaid_blocks -= prod.unpaid_blocks;
 
-      update_total_votepay_share( ct, -new_votepay_share, (updated_after_threshold ? prod.total_votes : 0.0) );
+//      update_total_votepay_share( ct, -new_votepay_share, (updated_after_threshold ? prod.total_votes : 0.0) );
 
       _producers.modify( prod, same_payer, [&](auto& p) {
          p.last_claim_time = ct;
