@@ -89,7 +89,7 @@ namespace eosiosystem {
       eosio_assert( ct - prod.last_claim_time > microseconds(useconds_per_day), "already claimed rewards within past day" );
 
 //      const asset token_supply   = eosio::token::get_supply(token_account, core_symbol().code() );
-//      const auto usecs_since_last_fill = (ct - _gstate.last_pervote_bucket_fill).count();
+      const auto usecs_since_last_fill = (ct - _gstate.last_pervote_bucket_fill).count();
 
 //      if( usecs_since_last_fill > 0 && _gstate.last_pervote_bucket_fill > time_point() ) {
 //         auto new_tokens = static_cast<int64_t>( (continuous_rate * double(token_supply.amount) * double(usecs_since_last_fill)) / double(useconds_per_year) );
@@ -123,6 +123,18 @@ namespace eosiosystem {
 //         _gstate.perblock_bucket         += to_per_block_pay;
 //         _gstate.last_pervote_bucket_fill = ct;
 //      }
+
+      // MEET.ONE Sidechain will tranfer bonus to block producers from MEET.ONE foundation(eosio.bpay & eosio.vpay).
+
+      if( usecs_since_last_fill > 0 && _gstate.last_pervote_bucket_fill > time_point() ) {
+         auto to_producers = static_cast<int64_t>((double(100000000) * double(usecs_since_last_fill)) /
+                                                  double(useconds_per_year));
+         auto to_per_block_pay = to_producers / 4;
+         auto to_per_vote_pay = to_producers - to_per_block_pay;
+         _gstate.pervote_bucket += to_per_vote_pay;
+         _gstate.perblock_bucket += to_per_block_pay;
+         _gstate.last_pervote_bucket_fill = ct;
+      }
 
       auto prod2 = _producers2.find( owner.value );
 
