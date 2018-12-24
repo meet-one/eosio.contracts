@@ -77,7 +77,7 @@ namespace eosiosystem {
    }
 
    using namespace eosio;
-   // MEET.ONE Sidechain will tranfer bonus to block producers from MEET.ONE foundation(eosio.bpay & eosio.vpay).
+
    void system_contract::claimrewards( const name owner ) {
       require_auth( owner );
 
