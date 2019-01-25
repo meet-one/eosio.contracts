@@ -275,7 +275,7 @@ namespace eosiosystem {
       for( const auto& pd : producer_deltas ) {
          auto pitr = _producers.find( pd.first.value );
          if( pitr != _producers.end() ) {
-            if(!pitr->active()){
+            if(pitr->active() == 0){
                 return;
             }
             eosio_assert( !voting || !pd.second.second /* not from new set */, "producer is not currently registered" );
