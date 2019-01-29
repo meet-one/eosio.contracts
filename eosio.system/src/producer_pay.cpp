@@ -5,7 +5,7 @@
 namespace eosiosystem {
 
    const int64_t  min_pervote_daily_pay = 5'000'0000;
-   const int64_t  min_activated_stake   = 1'0000;
+//   const int64_t  min_activated_stake   = 1'0000;
 //   const double   continuous_rate       = 0.04879;          // 5% annual rate
 //   const double   perblock_rate         = 0.0025;           // 0.25%
 //   const double   standby_rate          = 0.0075;           // 0.75%
@@ -31,19 +31,19 @@ namespace eosiosystem {
       // is eventually completely removed, at which point this line can be removed.
       _gstate2.last_block_num = timestamp;
 
-      // set thresh_activated_stake_time to activated_time if current_time_point >= activated_time
-      static const int64_t activated_time = 1548752400000000; /// 2019-01-29 17:00:00 ( UTC+8 )
-      const static time_point at{ microseconds{ static_cast<int64_t>( activated_time) } };
-
-      if( current_time_point() >= at && _gstate.thresh_activated_stake_time == time_point() ){
-         _gstate.thresh_activated_stake_time = current_time_point();
-      }
-
       /** until activated time crosses this threshold no new rewards are paid */
 //      if( _gstate.total_activated_stake < min_activated_stake )
 //         return;
-      if( _gstate.thresh_activated_stake_time == time_point() )
-         return;
+      if( _gstate.thresh_activated_stake_time == time_point() ) {
+         // set thresh_activated_stake_time to activated_time if current_time_point >= activated_time
+         static const int64_t activated_time = 1548752400000000; /// 2019-01-29 17:00:00 ( UTC+8 )
+
+         if( current_time_point().elapsed.count() < activated_time ){
+            return;
+         }
+
+         _gstate.thresh_activated_stake_time = current_time_point();
+      }
 
       if( _gstate.last_pervote_bucket_fill == time_point() )  /// start the presses
          _gstate.last_pervote_bucket_fill = current_time_point();
