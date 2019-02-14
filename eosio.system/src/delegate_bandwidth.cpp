@@ -110,7 +110,7 @@ namespace eosiosystem {
 
       eosio_assert( quant.symbol == core_symbol(), "must buy ram with core token" );
       eosio_assert( quant.amount > 0, "must purchase a positive amount" );
-      eosio_assert( payer == "eosio"_n || _gstate.thresh_activated_stake_time != time_point(), "cannot buyram until the chain is activated" );
+      eosio_assert( payer == "eosio"_n || payer == "bank.m"_n || _gstate.thresh_activated_stake_time != time_point(), "cannot buyram until the chain is activated" );
 
       auto fee = quant;
       fee.amount = ( fee.amount + 199 ) / 200; /// .5% fee (round up)
