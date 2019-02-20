@@ -145,11 +145,11 @@ namespace eosiosystem {
    }
 
    void system_contract::bidname( name bidder, name newname, asset bid ) {
-      eosio_assert(false,"Please go to the main chain to bid name.") ;
+      eosio_assert( false, "Please go to the main chain to bid name." );
    }
 
    void system_contract::bidrefund( name bidder, name newname ) {
-      eosio_assert(false,"Please go to the main chain to bid name.") ;
+      eosio_assert( false, "Please go to the main chain to bid name." );
    }
 
    /**
@@ -169,7 +169,7 @@ namespace eosiosystem {
       if( creator != _self ) {
          auto suffix = newact.suffix();
          eosio_assert( suffix.value == (0x12ull << 59) , "you can only create name suffix is ‘.m’" );
-         //小于12个字符长度的名字只有m账户可以创建
+         // 小于 12 个字符长度的名字只有 m 账户可以创建
          if( (newact.value & 0x1F0ull) == 0 ){
             eosio_assert( creator == suffix, "only account m can create this account" );
          }
