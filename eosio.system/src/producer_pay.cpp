@@ -36,7 +36,7 @@ namespace eosiosystem {
 //         return;
       if( _gstate.thresh_activated_stake_time == time_point() ) {
          // set thresh_activated_stake_time to activated_time if current_time_point >= activated_time
-         static const int64_t activated_time = 1548752400000000; /// 2019-01-29 17:00:00 ( UTC+8 )
+         static const int64_t activated_time = 1551272400000000; /// 2019-02-27 21:00:00 ( UTC+8 )
 
          if( current_time_point().elapsed.count() < activated_time ){
             return;
