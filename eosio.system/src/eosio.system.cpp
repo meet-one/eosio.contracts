@@ -168,9 +168,9 @@ namespace eosiosystem {
 
       if( creator != _self ) {
          auto suffix = newact.suffix();
-         eosio_assert( suffix.value == (0x12ull << 59) , "Account name must be 10 characters with no dots + '.m'" );
+         eosio_assert( suffix.value == (0x12ull << 59) , "Account name must be 10 characters with no dots + .m" );
          if( (newact.value & 0x1F0ull) == 0 ){
-            eosio_assert( creator == suffix, "Account name must be 10 characters with no dots + '.m'" );
+            eosio_assert( creator == suffix, "Account name must be 10 characters with no dots + .m" );
          }
          bool has_dot = false;
          uint32_t dot_count = 0;
@@ -180,7 +180,7 @@ namespace eosiosystem {
             }
             if( !(newact.value & (0x1full << moving_bits)) && has_dot ){
                dot_count +=1;
-               eosio_assert( dot_count < 2, "Account name must be 10 characters with no dots + '.m'" );
+               eosio_assert( dot_count < 2, "Account name must be 10 characters with no dots + .m" );
             }
          }
       }
