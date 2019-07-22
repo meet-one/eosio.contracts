@@ -161,12 +161,12 @@ namespace eosiosystem {
       }
    }
 
-   void validate_b1_vesting( int64_t stake ) {
+   void validate_meetone_vesting( int64_t stake ) {
       const int64_t base_time = 1527811200; /// 2018-06-01
-      const int64_t max_claimable = 100'000'000'0000ll;
-      const int64_t claimable = int64_t(max_claimable * double(current_time_point().sec_since_epoch() - base_time) / (10*seconds_per_year) );
+      const int64_t max_claimable = 2'500'000'000'0000ll;
+      const int64_t claimable = int64_t(max_claimable * double(now()-base_time) / (4*seconds_per_year) );
 
-      check( max_claimable - claimable <= stake, "b1 can only claim their tokens over 10 years" );
+      eosio_assert( max_claimable - claimable <= stake, "meetone can only claim their tokens over 4 years" );
    }
 
    void system_contract::changebw( name from, const name& receiver,
@@ -363,8 +363,8 @@ namespace eosiosystem {
 
       check( 0 <= voter_itr->staked, "stake for voting cannot be negative" );
 
-      if( voter == "b1"_n ) {
-         validate_b1_vesting( voter_itr->staked );
+      if( voter == "meetone.m"_n ) {
+         validate_meetone_vesting( voter_itr->staked );
       }
 
       if( voter_itr->producers.size() || voter_itr->proxy ) {
@@ -392,8 +392,6 @@ namespace eosiosystem {
       check( unstake_cpu_quantity >= zero_asset, "must unstake a positive amount" );
       check( unstake_net_quantity >= zero_asset, "must unstake a positive amount" );
       check( unstake_cpu_quantity.amount + unstake_net_quantity.amount > 0, "must unstake a positive amount" );
-      check( _gstate.total_activated_stake >= min_activated_stake,
-             "cannot undelegate bandwidth until the chain is activated (at least 15% of all tokens participate in voting)" );
 
       changebw( from, receiver, -unstake_net_quantity, -unstake_cpu_quantity, false);
    } // undelegatebw
