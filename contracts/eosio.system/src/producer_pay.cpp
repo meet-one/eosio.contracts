@@ -144,9 +144,9 @@ namespace eosiosystem {
          }
       }
 
-      if( producer_per_vote_pay < min_pervote_daily_pay ) {
-         producer_per_vote_pay = 0;
-      }
+      // if( producer_per_vote_pay < min_pervote_daily_pay ) {
+      //    producer_per_vote_pay = 0;
+      // }
 
       _gstate.pervote_bucket      -= producer_per_vote_pay;
       _gstate.perblock_bucket     -= producer_per_block_pay;
