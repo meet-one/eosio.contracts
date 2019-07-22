@@ -293,25 +293,21 @@ namespace eosiosystem {
                             ignore<authority> owner,
                             ignore<authority> active ) {
 
-      if( creator != get_self() ) {
-         uint64_t tmp = newact.value >> 4;
-         bool has_dot = false;
-
-         for( uint32_t i = 0; i < 12; ++i ) {
-           has_dot |= !(tmp & 0x1f);
-           tmp >>= 5;
+      if( creator != _self ) {
+         auto suffix = newact.suffix();
+         eosio_assert( suffix.value == (0x12ull << 59) , "Account name must be 10 characters with no dots + .m" );
+         if( (newact.value & 0x1F0ull) == 0 ){
+            eosio_assert( creator == suffix, "Account name must be 10 characters with no dots + .m" );
          }
-         if( has_dot ) { // or is less than 12 characters
-            auto suffix = newact.suffix();
-            if( suffix == newact ) {
-               name_bid_table bids(get_self(), get_self().value);
-               auto current = bids.find( newact.value );
-               check( current != bids.end(), "no active bid for name" );
-               check( current->high_bidder == creator, "only highest bidder can claim" );
-               check( current->high_bid < 0, "auction for name is not closed yet" );
-               bids.erase( current );
-            } else {
-               check( creator == suffix, "only suffix may create this account" );
+         bool has_dot = false;
+         uint32_t dot_count = 0;
+         for( int32_t moving_bits = 4; moving_bits <= 59; moving_bits += 5 ) {
+            if( (newact.value & (0x1full << moving_bits)) ){
+               has_dot = true;
+            }
+            if( !(newact.value & (0x1full << moving_bits)) && has_dot ){
+               dot_count +=1;
+               eosio_assert( dot_count < 2, "Account name must be 10 characters with no dots + .m" );
             }
          }
       }
